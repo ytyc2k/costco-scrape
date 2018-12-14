@@ -5,6 +5,10 @@ import csv
 
 #URLs of the specific products
 URLS = []
+ErrStr="Error Message"
+collected_data = []
+
+
 
 #Load the path of the driver for use
 def load_driver_path():
@@ -31,6 +35,8 @@ def link_driver(path_to_driver):
 #  2. Turns it into soup
 def load_data(webdriver):
     for url in URLS:
+
+        print(url)
         #Get the contents of the URL
         webdriver.get(url)
 
@@ -41,6 +47,15 @@ def load_data(webdriver):
         soup = BeautifulSoup(innerHTML, "html.parser")
 
         extract_and_load_all_data(soup)
+
+    field_names = ["Name", "Description", "Price", "Image"]
+    with open('ImageUrls', 'w') as imgfile:
+        with open('OutputData.csv', 'w', newline='',encoding='utf-8') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=field_names)
+            writer.writeheader()
+            for i in collected_data:
+                imgfile.writelines(i['Image']+'\n')
+                writer.writerow(i)
 
 #closes the driver
 def quit_driver(webdriver):
@@ -63,17 +78,26 @@ def get_meta_tags(soup):
 
 # gets the product name
 def get_product_name(soup):
-    product_name = soup.find('meta', property="og:description").get('content')
+    try:
+        product_name = soup.find('meta', property="og:description").get('content')
+    except Exception as e:
+        product_name = "No Product"
     return product_name
 
 # logic for getting product description/specification
 def get_product_info(types, soup):
     if types == "description":
-        tags = soup.find('div', class_ = "product-info-description").descendants
+        try:
+            tags = soup.find('div', class_ = "product-info-description",itemprop="description").descendants
+        except Exception as e:
+            return ErrStr
     elif types == "specification":
-        tags = soup.find('div', id = "pdp-accordion-collapse-2").descendants
+        try:
+            tags = soup.find('div', id = "pdp-accordion-collapse-2").descendants
+        except Exception as e:
+            return ErrStr
     else:
-        return "Wrong String!"
+        return ErrStr
 
     data = ""
 
@@ -86,7 +110,9 @@ def get_product_info(types, soup):
         else:
             continue
 
-    return "\"" + data.replace("\"", "\"\"") + "\""
+    data="".join(data.split())
+
+    return data
 
 # gets the product description
 def get_product_description(soup):
@@ -105,42 +131,34 @@ def get_category(soup):
 
 # gets the product price
 def get_price(soup):
-    tag = soup.find('span', class_ = "op-value")
-    return tag.text
+    try:
+        tag = soup.find('span', class_ = "op-value")
+        return tag.text
+    except Exception as e:
+        return ErrStr
 
 # gets the product image
 def get_embedded_images(soup):
-    tag = soup.find('img', id = "productImage")
-    return tag['src']
-
+    try:
+        tag = soup.find('img', id = "productImage")
+        return tag['src']
+    except Exception as e:
+        return ErrStr
 # Load data to csv
 def extract_and_load_all_data(soup):
-    field_names = ["Meta tags", "Name", "Description", "Specifications", "Category", "Price", "Image"]
-    output_data = open('OutputData.csv', 'a',encoding='utf-8')
-
-    writer = csv.DictWriter(output_data, field_names,
-        delimiter='\n')#,
-        #dialect='excel',
-        #lineterminator="\r\n")
-
-    writer.writerow({field: field for field in field_names})
-
-    collected_data = [
+    global collected_data
+    collected_data = collected_data+[
         {
-            "Meta tags": get_meta_tags(soup),
+            #"Meta tags": get_meta_tags(soup),
             "Name": get_product_name(soup),
             "Description": get_product_description(soup),
-            "Specifications": get_product_specification(soup),
-            "Category": get_category(soup),
+            #"Specifications": get_product_specification(soup),
+            #"Category": get_category(soup),
             "Price": get_price(soup),
             "Image": get_embedded_images(soup)
         }
     ]
 
-    for item_property_dict in collected_data:
-        writer.writerow(item_property_dict)
-
-    output_data.close()
 
 #  1. Links the driver
 #  2. Loads the html data
@@ -163,5 +181,5 @@ def main():
     for p in processes:
         p.join()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
