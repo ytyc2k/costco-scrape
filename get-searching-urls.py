@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup, NavigableString #extract the html from the request
 from selenium import webdriver #deal with the dynamic javascript
 from multiprocessing import Process
-import re
 
 #URLs of the specific products
 URLS = []

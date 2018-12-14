@@ -1,11 +1,8 @@
 # Costco Scrape
 
 This web scrape utilizes the BeautifulSoup and Selenium Webdriver libraries to fetch the following data from a Costco product page and load it into a CSV file:
-- SEO Meta Tags
 - Product Name
 - Product Description
-- Product Specifications
-- Category
 - Price
 - Embedded images
 
@@ -44,21 +41,18 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Running:
 For every iteration of scraping:
-  1. In the **URLS.txt** file, delete all the current urls there
-  2. Paste **10** new links, each on its own line, without quotation lines  
-  3. On the command line, go to the directory of the github repository by running:
-     
-     `cd /d C:\Users\DAE\Documents\CostcoScrape\costco-scrape-master`
-     
-  4. On the command line, start the script by running:
-  
-     `python scrape.py`
-  
-  5. That should run without any errors! In case there are, there could be something wrong with steps 2-3.
-  
-  4. Open the **OutputData.csv** file and voila, all the data from the above 10 links is loaded!
-  
-  5. Congratulations!
+  1. python get-searching-urls.py
+     You will get the URLS.txt which include the url-lists of serching result.
+     Note:urls = ['https://www.costco.ca/CatalogSearch?keyword=chocolate'] # You can change 'chocolate' to what you want.
+  2. python scrape.py
+     You will get OutputData.csv whick include all infomation of your searching results.
+     And you will get a file named ImageUrls
+
+  3. If you want to download all the images of your searching-result,
+     python read_urls_download_images.py
+     note:dir='C:\\Users\\T180P\\Desktop\\Tong\\WixWeb\\Pictures\\chocalate\\' # change to your directory.
+
   
 ### Authors:
 - CHUDDY
+- TONG
